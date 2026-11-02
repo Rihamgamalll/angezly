@@ -1449,3 +1449,12 @@ body { background:var(--paper); }
     margin-right: -9px;
   }
 }
+
+/* RiWebs creator credit — additive footer styling */
+.riwebs-footer-credit{max-width:1360px;margin:0 auto;padding:15px 38px 22px;border-top:1px solid #dce6dc;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;color:#587065;font-size:12px;direction:ltr}
+.riwebs-credit-brand{display:inline-flex;align-items:center;gap:7px;color:#174f3d;text-decoration:none;font-size:14px}
+.riwebs-credit-brand img{width:32px;height:32px;object-fit:cover;border-radius:9px;background:white}
+.riwebs-social-links{display:flex;align-items:center;gap:12px;margin-inline-start:12px}
+.riwebs-social-links a{color:#315d4d;text-decoration:none;font-size:12px}
+.riwebs-social-links a:hover{text-decoration:underline}
+@media(max-width:600px){.riwebs-footer-credit{padding:18px 20px;gap:9px}.riwebs-social-links{width:100%;justify-content:center;margin:0}}
