@@ -1458,3 +1458,31 @@ body { background:var(--paper); }
 .riwebs-social-links a{color:#315d4d;text-decoration:none;font-size:12px}
 .riwebs-social-links a:hover{text-decoration:underline}
 @media(max-width:600px){.riwebs-footer-credit{padding:18px 20px;gap:9px}.riwebs-social-links{width:100%;justify-content:center;margin:0}}
+
+/* Keep the three booking-step icons visible and aligned on mobile. */
+@media (max-width: 640px) {
+  .dawrak-app .flow-steps > div {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 4px;
+    min-height: 110px;
+    padding: 17px 18px;
+  }
+  .dawrak-app .flow-steps > div > svg {
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    margin: 0;
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+  }
+  .dawrak-app .flow-steps strong { grid-column: 2; grid-row: 1; margin: 0; }
+  .dawrak-app .flow-steps small { grid-column: 2; grid-row: 2; }
+  .dawrak-app .flow-steps .flow-num {
+    grid-column: 3; grid-row: 1 / 3; align-self: center;
+  }
+}

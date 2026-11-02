@@ -4,7 +4,6 @@ import { Link, navigate } from '@/lib/router';
 import { useDocumentMeta } from '@/lib/hooks';
 import { BRAND_NAME, DOCTOR_SPECIALTIES, SUBJECTS, GOVERNORATES } from '@/lib/constants';
 import { isBackendConfigured } from '@/lib/supabase';
-import { ExperienceShowcase } from '@/components/ExperienceShowcase';
 
 type SearchType = 'doctor' | 'teacher';
 
@@ -83,7 +82,6 @@ export function HomePage() {
 
       <section className="home-flow" aria-label="خطوات الحجز"><div className="home-flow-inner"><div className="flow-intro"><span className="section-marker">تجربة حجز واضحة</span><h2>ثلاث خطوات.<br/><em>وحجزك أوضح.</em></h2></div><div className="flow-steps"><div><span className="flow-num">01</span><Search size={22}/><strong>ابحث</strong><small>عن الطبيب أو المُدرّس</small></div><div><span className="flow-num">02</span><Clock3 size={22}/><strong>اختر</strong><small>الموعد أو المجموعة المناسبة</small></div><div><span className="flow-num">03</span><Check size={22}/><strong>أكّد الحجز</strong><small>واحتفظ بتفاصيله في حسابك</small></div></div></div></section>
 
-      <ExperienceShowcase />
 
       <section className="home-explore"><div className="home-explore-head"><div><span className="section-marker">استكشف بسهولة</span><h2>ابدأ بما تبحث عنه</h2></div><p>تخصّصات ومواد دراسية، مباشرة إلى ما يهمّك.</p></div><div className="explore-columns"><div className="explore-panel"><div className="explore-label"><span className="explore-label-icon"><Stethoscope size={21}/></span><h3>التخصصات الطبية</h3><Link to="/doctors">عرض الكل <ArrowLeft size={17}/></Link></div><div className="explore-chips">{DOCTOR_SPECIALTIES.slice(0,7).map(x => <Link to={`/doctors?specialty=${encodeURIComponent(x)}`} key={x}>{x} <ArrowUpLeft size={13}/></Link>)}</div></div><div className="explore-panel explore-panel-edu"><div className="explore-label"><span className="explore-label-icon"><GraduationCap size={21}/></span><h3>المواد الدراسية</h3><Link to="/teachers">عرض الكل <ArrowLeft size={17}/></Link></div><div className="explore-chips">{SUBJECTS.slice(0,7).map(x => <Link to={`/teachers?subject=${encodeURIComponent(x)}`} key={x}>{x} <ArrowUpLeft size={13}/></Link>)}</div></div></div></section>
 
