@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { InstallApp } from '@/components/InstallApp';
 import { SiteLayout } from '@/components/SiteLayout';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { useAuth } from '@/lib/auth';
@@ -118,6 +119,7 @@ export default function App() {
           </div>
         </RouteErrorBoundary>
       </AuthRedirect>
+      <InstallApp />
     </SiteLayout>
   );
 }

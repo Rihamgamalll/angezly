@@ -26,6 +26,7 @@ export function EnrollGroupModal({
   const { session, hasRole } = useAuth();
   const [studentName, setStudentName] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
   const [studentGrade, setStudentGrade] = useState('');
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -35,6 +36,7 @@ export function EnrollGroupModal({
     if (!group) return;
     setStudentName('');
     setStudentPhone('');
+    setGuardianPhone('');
     setStudentGrade(group.grade);
     setFormError('');
     setBookingRef(null);
@@ -46,6 +48,7 @@ export function EnrollGroupModal({
 
     const name = studentName.trim();
     const phone = studentPhone.trim();
+    const parentPhone = guardianPhone.trim();
 
     if (name.length < 2) {
       setFormError('يرجى إدخال اسم الطالب بشكل صحيح.');
@@ -54,6 +57,16 @@ export function EnrollGroupModal({
 
     if (!isValidEgyptianPhone(phone)) {
       setFormError('يرجى إدخال رقم موبايل مصري صحيح (01xxxxxxxxx).');
+      return;
+    }
+
+    if (!isValidEgyptianPhone(parentPhone)) {
+      setFormError('يرجى إدخال رقم موبايل ولي الأمر بشكل صحيح.');
+      return;
+    }
+
+    if (phone === parentPhone) {
+      setFormError('يرجى إدخال رقم مختلف لولي الأمر عن رقم الطالب.');
       return;
     }
 
@@ -70,10 +83,11 @@ export function EnrollGroupModal({
         }
       }
 
-      const { data, error } = await supabase.rpc('enroll_in_group', {
+      const { data, error } = await supabase.rpc('enroll_in_group_with_guardian', {
         p_group_id: group.id,
         p_student_name: name,
         p_student_phone: phone,
+        p_guardian_phone: parentPhone,
         p_student_grade: studentGrade || group.grade,
         // للحفاظ على التوافق مع وظيفة قاعدة البيانات الحالية.
         p_booked_for_child: false,
@@ -154,9 +168,9 @@ export function EnrollGroupModal({
           </Field>
 
           <Field
-            label="رقم الموبايل"
+            label="رقم موبايل الطالب"
             htmlFor="student-phone"
-            hint="رقم الطالب أو ولي الأمر للتواصل"
+            hint="رقم الطالب للتواصل"
           >
             <TextInput
               id="student-phone"
@@ -166,8 +180,16 @@ export function EnrollGroupModal({
               placeholder="01xxxxxxxxx"
               dir="ltr"
               className="text-start"
+              maxLength={11}
               required
             />
+          </Field>
+
+          <Field label="رقم موبايل ولي الأمر" htmlFor="guardian-phone" hint="رقم مستقل للتواصل مع ولي الأمر">
+            <TextInput id="guardian-phone" value={guardianPhone}
+              onChange={(event) => setGuardianPhone(event.target.value)}
+              inputMode="tel" autoComplete="tel" placeholder="01xxxxxxxxx"
+              dir="ltr" className="text-start" maxLength={11} required />
           </Field>
 
           <Field label="الصف الدراسي" htmlFor="student-grade">
