@@ -1,0 +1,14 @@
+import { readFileSync } from 'node:fs';
+const read = (name) => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8');
+const teacher = read('src/pages/TeacherSearchPage.tsx');
+const styles = read('src/index.css');
+const doc = read('src/pages/DoctorDashboardPage.tsx');
+const teacherDash = read('src/pages/TeacherDashboardPage.tsx');
+const assert = (condition, msg) => { if (!condition) throw new Error(msg); };
+assert(teacher.includes('GraduationCap, Search, SlidersHorizontal'), 'Search icon import missing');
+assert(!styles.includes('.work-stats p:last-child {'), 'Fragile KPI CSS selector remains');
+assert(doc.includes("professionalGreeting('doctor', doctor.full_name)"), 'Doctor greeting missing');
+assert(teacherDash.includes("professionalGreeting('teacher', teacher.full_name)"), 'Teacher greeting missing');
+assert(doc.includes('work-stat-card__value'), 'Doctor stats markup missing');
+assert(teacherDash.includes('work-stat-card__value'), 'Teacher stats markup missing');
+console.log('V12 structural checks passed. Full npm build and live integration tests must be run separately.');

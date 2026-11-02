@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">دَوْرك</string>
+    <string name="title_activity_main">دَوْرك</string>
+    <string name="package_name">com.dawrak.app</string>
+    <string name="custom_url_scheme">com.dawrak.app</string>
+</resources>
