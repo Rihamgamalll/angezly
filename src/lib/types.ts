@@ -14,6 +14,7 @@ export type Doctor = {
   clinic_address: string;
   consultation_price: number;
   slot_minutes: number;
+  max_daily_visits?: number;
   is_published: boolean;
   is_demo: boolean;
   user_id: string | null;

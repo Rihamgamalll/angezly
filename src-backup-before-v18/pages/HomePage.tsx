@@ -9,7 +9,7 @@ import { ExperienceShowcase } from '@/components/ExperienceShowcase';
 type SearchType = 'doctor' | 'teacher';
 
 export function HomePage() {
-  useDocumentMeta('دَوْرك | كل موعد في مكانه', 'احجز موعد طبيب أو مكانًا في مجموعة دراسية بسهولة عبر دَوْرك.');
+  useDocumentMeta('دَوْرك | كل موعد في مكانه', 'احجز موعد طبيب أو مكانًا في مجموعة دراسية بسهولة عبر انجزلي.');
   const [type, setType] = useState<SearchType>('doctor');
   const [query, setQuery] = useState('');
   const [governorate, setGovernorate] = useState('');

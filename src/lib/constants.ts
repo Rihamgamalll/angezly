@@ -99,7 +99,7 @@ export const PRICE_PERIOD_LABELS: Record<string, string> = {
 
 export const GROUP_MODE_LABELS: Record<string, string> = {
   online: 'أونلاين',
-  offline: 'ط­ط¶ظˆط±ظٹ',
+  offline: 'حضوري',
 };
 
 export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
