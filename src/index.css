@@ -1486,3 +1486,16 @@ body { background:var(--paper); }
     grid-column: 3; grid-row: 1 / 3; align-self: center;
   }
 }
+
+/* RiWebs final fix: keep Arabic brand wordmark upright everywhere (desktop and mobile). */
+.dawrak-app .new-brand-mark strong,
+.new-brand-mark strong {
+  transform: none !important;
+  rotate: none !important;
+  font-family: "Alexandria", "IBM Plex Sans Arabic", sans-serif !important;
+  font-weight: 800 !important;
+  font-style: normal !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  text-align: center;
+}
