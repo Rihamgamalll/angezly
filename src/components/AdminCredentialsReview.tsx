@@ -9,7 +9,7 @@ type Credential = {
   doctor_id: string | null; teacher_id: string | null;
 };
 
-export function AdminCredentialsReview() {
+export function AdminCredentialsReview({ onReviewed }: { onReviewed?: () => void }) {
   const [items, setItems] = useState<Credential[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
@@ -35,7 +35,7 @@ export function AdminCredentialsReview() {
       p_credential_id: item.id, p_decision: decision,
     });
     setBusy('');
-    if (e) setError(getErrorMessage(e)); else void refresh();
+    if (e) setError(getErrorMessage(e)); else { void refresh(); onReviewed?.(); }
   };
   return (
     <Card className="mt-8 space-y-4 p-6">

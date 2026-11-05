@@ -41,6 +41,8 @@ export function AppointmentTrackingPage() {
   const [error, setError] = useState('');
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const load = useCallback(async (quiet = false) => {
     if (!token) return;
@@ -50,12 +52,17 @@ export function AppointmentTrackingPage() {
       setError(getErrorMessage(rpcError));
     } else {
       const row = (data?.[0] ?? null) as FollowUp | null;
-      setInfo(row);
+      setInfo(previous => {
+        if (previous && row && row.appointment_status === 'booked' && previous.patients_ahead != null && row.patients_ahead != null && row.patients_ahead < previous.patients_ahead && document.visibilityState === 'visible' && notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification('أنجزلي · دورك قرب', { body: row.patients_ahead === 0 ? 'دورك جه! تواصل مع العيادة.' : `فاضلك ${row.patients_ahead} مريض قبلك.` });
+        }
+        return row;
+      });
       setError(row ? '' : 'الرابط غير صالح أو انتهت صلاحيته. استخدم رابط المتابعة الذي حصلت عليه بعد الحجز.');
       setLastChecked(new Date());
     }
     setLoading(false);
-  }, [token]);
+  }, [token, notificationsEnabled]);
 
   useEffect(() => {
     if (!token) return;
@@ -96,6 +103,49 @@ export function AppointmentTrackingPage() {
     }
   };
 
+  const cancelBooking = async () => {
+    if (!token || !window.confirm('متأكدة إنك عايزة تلغي الحجز؟')) return;
+    setCancelling(true);
+    const { error: cancelError } = await supabase.rpc('cancel_appointment_with_tracking_token', { p_token: token });
+    setCancelling(false);
+    if (cancelError) { setError(getErrorMessage(cancelError)); return; }
+    await load();
+  };
+
+  const enableNotifications = async () => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setError('جهازك أو المتصفح مش بيدعم إشعارات الخلفية. متابعة الدور داخل الصفحة شغالة عادي.');
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setError('الإشعارات مش مفعّلة. تقدر تتابع دورك من الصفحة.');
+        return;
+      }
+      const key = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+      if (!key) {
+        setError('تنبيهات الخلفية لسه محتاجة تفعيل من إدارة أنجزلي. متابعة الصفحة متاحة.');
+        return;
+      }
+      const normalized = key.replace(/-/g, '+').replace(/_/g, '/');
+      const binary = atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='));
+      const applicationServerKey = Uint8Array.from(binary, character => character.charCodeAt(0));
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      const subscription = await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
+      const json = subscription.toJSON();
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) throw new Error('Invalid subscription');
+      const {error: saveError} = await supabase.rpc('save_queue_push_subscription', {
+        p_token: token, p_endpoint: json.endpoint, p_p256dh: json.keys.p256dh, p_auth: json.keys.auth,
+      });
+      if (saveError) throw saveError;
+      setNotificationsEnabled(true);
+      setError('');
+    } catch {
+      setError('تعذّر تفعيل إشعارات الخلفية. تأكدي من تثبيت التطبيق ومن إعدادات الإشعارات.');
+    }
+  };
+
   const isFinished = info?.appointment_status === 'completed' || info?.queue_status === 'completed';
   const isCancelled = info?.appointment_status === 'cancelled';
   const isAbsent = info?.appointment_status === 'no_show' || info?.queue_status === 'no_show';
@@ -108,8 +158,8 @@ export function AppointmentTrackingPage() {
     : isAbsent ? 'سجّلت العيادة عدم الحضور. يُرجى التواصل معها إذا كانت هناك مشكلة.'
     : isFinished ? 'انتهت زيارتك. نتمنى لك دوام الصحة.'
     : inConsultation ? 'وصل دورك، والطبيب يجري الكشف الآن.'
-    : waiting ? 'تم تسجيل وصولك. يتحدث ترتيب الانتظار تلقائيًا أثناء عمل العيادة.'
-    : 'عند وصولك إلى العيادة، أبلغ الاستقبال لتسجيل حضورك وتحديد رقم دورك.';
+    : waiting ? 'رقم دورك محجوز من وقت تأكيد الحجز. عدد المنتظرين بيتحدث تلقائيًا أثناء عمل العيادة.'
+    : 'رقم دورك يظهر بعد تأكيد الحجز وتفعيل تحديث قاعدة البيانات.';
 
   return <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
     <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
@@ -152,12 +202,12 @@ export function AppointmentTrackingPage() {
                 <div className="rounded-xl bg-white p-4"><p className="text-xs text-ink-500">الدور الجاري</p><strong className="mt-2 block text-2xl text-ink-900">{info.current_number || 'لم يبدأ بعد'}</strong></div>
                 <div className="col-span-2 rounded-xl bg-white p-4 sm:col-span-1"><p className="text-xs text-ink-500">المنتظرون قبلك</p><strong className="mt-2 block text-3xl text-ink-900">{inConsultation ? '0' : (info.patients_ahead ?? 0)}</strong></div>
               </div>}
-              {!isCancelled && !isAbsent && !isFinished && !hasArrived && <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm text-ink-700">رقم الدور يظهر بعد تسجيل حضورك لدى العيادة، وليس عند حجز الموعد.</p>}
+              {!isCancelled && !isAbsent && !isFinished && !hasArrived && <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm text-ink-700">رقم الدور هيظهر بعد تأكيد الحجز لما تحديث قاعدة البيانات يتفعّل.</p>}
             </div>
             {!isCancelled && !isAbsent && <div className="mt-7">
               <p className="mb-4 text-sm font-extrabold text-ink-900">مراحل زيارتك</p>
               <ol className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[{label:'تأكيد الحجز',number:0},{label:'تسجيل الوصول',number:1},{label:'بدء الكشف',number:2},{label:'اكتمال الكشف',number:3}].map(({label,number})=><li key={number} className={`rounded-xl border p-3 text-center text-xs font-bold ${stage>=number?'border-brand-200 bg-brand-50 text-brand-800':'border-ink-100 bg-white text-ink-400'}`}><div className="mb-2 flex justify-center">{stage>=number?<CheckCircle2 className="h-5 w-5"/>:<span className="flex h-5 w-5 items-center justify-center rounded-full border">{number+1}</span>}</div>{label}</li>)}
+                {[{label:'تأكيد الحجز',number:0},{label:'رقم الدور',number:1},{label:'بدء الكشف',number:2},{label:'اكتمال الكشف',number:3}].map(({label,number})=><li key={number} className={`rounded-xl border p-3 text-center text-xs font-bold ${stage>=number?'border-brand-200 bg-brand-50 text-brand-800':'border-ink-100 bg-white text-ink-400'}`}><div className="mb-2 flex justify-center">{stage>=number?<CheckCircle2 className="h-5 w-5"/>:<span className="flex h-5 w-5 items-center justify-center rounded-full border">{number+1}</span>}</div>{label}</li>)}
               </ol>
             </div>}
             {(isCancelled || isAbsent) && <div className="mt-5 flex items-center gap-2 text-sm text-ink-600"><XCircle className="h-5 w-5" /> لو محتاج موعدًا جديدًا، تواصل مع العيادة.</div>}
@@ -169,10 +219,12 @@ export function AppointmentTrackingPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" onClick={() => void load()} loading={loading}><RefreshCw className="h-4 w-4"/> تحديث الآن</Button>
+          {info.appointment_status === 'booked' && <Button variant="danger" loading={cancelling} onClick={() => void cancelBooking()}>إلغاء الحجز</Button>}
+          {info.appointment_status === 'booked' && !notificationsEnabled && <Button variant="secondary" onClick={() => void enableNotifications()}>🔔 فعّل إشعارات الدور على الموبايل</Button>}
           <Button variant="secondary" onClick={copyLink}><Copy className="h-4 w-4"/> {copySuccess ? 'تم نسخ الرابط' : 'نسخ رابط المتابعة'}</Button>
           {info.doctor_slug && <Link to={`/doctor/${info.doctor_slug}`} className="inline-flex min-h-10 items-center rounded-xl border border-ink-200 px-4 text-sm font-bold text-brand-700">صفحة الطبيب <ArrowUpLeft className="mr-2 h-4 w-4"/></Link>}
         </div>
-        <p className="text-xs leading-6 text-ink-500">تظهر التغييرات عادةً خلال ثوانٍ أثناء فتح الصفحة. عدد المنتظرين مبني على من سجّلت العيادة حضورهم؛ لا يمثل تقديرًا دقيقًا لوقت الانتظار. احتفظ بالرابط لنفسك، فمَن يملكه يستطيع رؤية حالة الحجز.</p>
+        <p className="text-xs leading-6 text-ink-500">تظهر التغييرات عادةً خلال ثوانٍ أثناء فتح الصفحة. عدد المنتظرين يعتمد على الحجوزات النشطة قبل دورك؛ مش تقدير دقيق لوقت الكشف. تنبيهات الخلفية تتطلب موافقتك وتفعيل خدمة الإرسال في إعدادات Supabase. احتفظ بالرابط لنفسك، فمَن يملكه يستطيع رؤية حالة الحجز.</p>
       </> : <Card className="p-6"><h2 className="mb-2 text-lg font-bold">تعذّر عرض الحجز</h2><p className="text-sm text-ink-500">تأكد من رابط المتابعة. لو فقدته وكان الحجز على نفس الجهاز، تقدر تفتحه من حجوزاتي.</p><button type="button" onClick={()=>{setToken('');window.history.replaceState(null,'','/track');setError('');}} className="mt-4 text-sm font-bold text-brand-700 underline">إدخال رابط مختلف</button></Card>}
     </div>}
   </section>;

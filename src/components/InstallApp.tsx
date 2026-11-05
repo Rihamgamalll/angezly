@@ -105,14 +105,14 @@ export function InstallApp() {
             </button>
           )}
           <div style={{ background: '#f0faf7', borderRadius: 12, padding: 12, fontSize: 13, lineHeight: 1.9 }}>
-            {inAppBrowser && <p style={{ fontWeight: 700, marginBottom: 8 }}>افتحي الرابط خارج واتساب أو فيسبوك أو إنستجرام أولًا، من قائمة ⋮ ثم «فتح في المتصفح».</p>}
+            {inAppBrowser && <p style={{ fontWeight: 700, marginBottom: 8 }}>افتح الرابط خارج واتساب أو فيسبوك أو إنستجرام أولًا، من قائمة ⋮ ثم «فتح في المتصفح».</p>}
             {platform === 'ios' ? (
-              <><Share2 size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> على آيفون: افتحي الرابط في <b>Safari</b>، اضغطي <b>مشاركة</b> ثم <b>إضافة إلى الشاشة الرئيسية</b> وبعدها <b>إضافة</b>. على بعض إصدارات iOS قد يظهر الخيار داخل قائمة «المزيد».</>
+              <><Share2 size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> على آيفون: افتح الرابط في <b>Safari</b>، اضغطي <b>مشاركة</b> ثم <b>إضافة إلى الشاشة الرئيسية</b> وبعدها <b>إضافة</b>. على بعض إصدارات iOS قد يظهر الخيار داخل قائمة «المزيد».</>
             ) : platform === 'android' ? (
-              <>على أندرويد: افتحي الرابط في <b>Chrome</b> واضغطي <b>⋮</b> ثم <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>. {promptEvent ? 'أو استخدمي زر التثبيت الأخضر فوق.' : 'لو مش ظاهر، جرّبي بعد فتح الموقع المنشور HTTPS في Chrome مباشرة.'}</>
+              <>على أندرويد: افتح الرابط في <b>Chrome</b> واضغطي <b>⋮</b> ثم <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>. {promptEvent ? 'أو استخدمي زر التثبيت الأخضر فوق.' : 'لو مش ظاهر، جرّبي بعد فتح الموقع المنشور HTTPS في Chrome مباشرة.'}</>
             ) : (
-              <>افتحي <b>رابط أنجزلي المنشور</b> على الموبايل في Chrome (أندرويد) أو Safari (آيفون) لتثبيته. على الكمبيوتر قد يظهر خيار «تثبيت» في شريط العنوان في Chrome أو Edge.</>
-            )}
+              <>افتح <b>رابط أنجزلي المنشور</b> على الموبايل في Chrome (أندرويد) أو Safari (آيفون) لتثبيته. على الكمبيوتر قد يظهر خيار «تثبيت» في شريط العنوان في Chrome أو Edge.</>
+           )}
           </div>
           {notice && <p role="status" style={{ fontSize: 13, marginTop: 10, color: '#165e50' }}><CheckCircle2 size={14} style={{ display: 'inline' }} /> {notice}</p>}
           <button type="button" onClick={dismiss} style={{ marginTop: 12, fontSize: 13, textDecoration: 'underline' }}>تجاهل</button>
