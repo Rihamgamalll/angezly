@@ -8,3 +8,17 @@ self.addEventListener('fetch', (event) => {
     { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
   )));
 });
+
+// Push payload contains no patient names, phone numbers, or private tracking tokens.
+self.addEventListener('push', (event) => {
+  let message = { title: 'أنجزلي', body: 'في تحديث جديد على دورك.', url: '/' };
+  try { if (event.data) message = { ...message, ...event.data.json() }; } catch { /* ignore malformed payload */ }
+  event.waitUntil(self.registration.showNotification(message.title, {
+    body: message.body, icon: '/icon-192.png', badge: '/icon-192.png',
+    data: { url: '/' }, tag: 'angezly-queue', renotify: true,
+  }));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.openWindow('/'));
+});
